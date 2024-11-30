@@ -4,15 +4,50 @@ A simple calculator that uses OpenAI's function calling to process mathematical 
 
 ## Setup
 
-1. Clone this repository
-2. Install the requirements:
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/s2005/openai-calculator.git
+   cd openai-calculator
+   ```
+
+2. Set up a virtual environment:
+
+   ### On Linux/macOS:
+   ```bash
+   # Create virtual environment
+   python3 -m venv venv
+
+   # Activate virtual environment
+   source venv/bin/activate   # For bash/zsh
+   # OR
+   . venv/bin/activate       # Alternative method
+   ```
+
+   ### On Windows:
+   ```powershell
+   # Create virtual environment
+   python -m venv venv
+
+   # Activate virtual environment
+   .\venv\Scripts\activate    # For PowerShell
+   # OR
+   venv\Scripts\activate.bat  # For Command Prompt
+   ```
+
+3. Install the requirements:
    ```bash
    pip install -r requirements.txt
    ```
-3. Copy `.env.template` to `.env` and add your OpenAI API key:
+
+4. Copy `.env.template` to `.env` and add your OpenAI API key:
    ```bash
    cp .env.template .env
    # Edit .env and add your OpenAI API key
+   ```
+
+   Note: On Windows, you can copy the file using:
+   ```powershell
+   copy .env.template .env
    ```
 
 ## Usage
