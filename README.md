@@ -29,9 +29,9 @@ A simple calculator that uses OpenAI's function calling to process mathematical 
    python -m venv venv
 
    # Activate virtual environment
-   .\venv\Scripts\activate    # For PowerShell
+   .\\venv\\Scripts\\activate    # For PowerShell
    # OR
-   venv\Scripts\activate.bat  # For Command Prompt
+   venv\\Scripts\\activate.bat  # For Command Prompt
    ```
 
 3. Install the requirements:
