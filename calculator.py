@@ -8,10 +8,34 @@ import argparse
 import json
 import os
 import sys
-from typing import Dict, Any
+import re
+from typing import Dict, Any, Union
 
 from dotenv import load_dotenv
 from openai import OpenAI
+
+def validate_expression(expression: str) -> Union[bool, str]:
+    """Validate the mathematical expression."""
+    # Check for multiple operators
+    if re.search(r'[\+\-\*\/]{2,}', expression):
+        return "Invalid operator sequence"
+    
+    # Check for division by zero
+    if re.search(r'/\s*0(?![.])', expression):
+        return "Division by zero"
+    
+    # Basic syntax check
+    try:
+        # Replace all numbers and basic operators with 'x' to check structure
+        simplified = re.sub(r'[\d.]+', 'x', expression)
+        simplified = re.sub(r'[\+\-\*\/\(\)]', 'x', simplified)
+        # If anything other than 'x' and whitespace remains, it's invalid
+        if re.search(r'[^\sx]', simplified):
+            return "Invalid characters in expression"
+    except Exception:
+        return "Invalid expression format"
+        
+    return True
 
 def setup_argparse() -> argparse.ArgumentParser:
     """Configure and return the argument parser."""
@@ -72,11 +96,30 @@ def get_calculator_functions() -> list:
 
 def process_calculation(client: OpenAI, args: argparse.Namespace) -> Dict[str, Any]:
     """Process the calculation using OpenAI's function calling."""
+    # Validate expression first
+    validation_result = validate_expression(args.expression)
+    if validation_result is not True:
+        return {
+            "error": validation_result,
+            "expression": args.expression,
+            "status": "failed"
+        }
+
     try:
+        system_message = """You are a precise calculator. When evaluating mathematical expressions:
+1. Always follow standard mathematical order of operations (PEMDAS)
+2. For mixed operations, use the 'mixed' operation type
+3. Return exact numerical results
+4. Validate all inputs thoroughly"""
+
         response = client.chat.completions.create(
             model=args.model,
             temperature=args.temperature,
             messages=[
+                {
+                    "role": "system",
+                    "content": system_message
+                },
                 {
                     "role": "user",
                     "content": f"Calculate this expression and provide the result: {args.expression}"
@@ -89,7 +132,7 @@ def process_calculation(client: OpenAI, args: argparse.Namespace) -> Dict[str, A
         # Extract the function call from the response
         function_call = response.choices[0].message.function_call
         
-        # Parse and return the calculation result
+        # Parse the calculation result
         return json.loads(function_call.arguments)
 
     except Exception as e:
