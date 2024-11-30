@@ -1,0 +1,3 @@
+"""
+OpenAI Calculator Package
+"""
