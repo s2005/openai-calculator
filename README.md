@@ -78,49 +78,62 @@ python calculator.py --model gpt-4 --temperature 0.2 "23 * 45"
 }
 ```
 
-## MCP Server Usage
+## MCP Calculator Server (Anthropic Protocol)
 
-The Multi-Calculator Proxy (MCP) server provides an HTTP API for calculations.
+This server implements Anthropic's Model Context Protocol (MCP) to expose the calculator functionality. It uses the `mcp` Python SDK (version 1.9.0 or higher).
+
+### Installation of MCP tools
+
+The necessary MCP libraries, including the CLI, are part of the project's requirements. If you installed dependencies using `pip install -r requirements.txt`, the MCP tools should be available. The specific dependency is `mcp[cli]>=1.9.0`.
 
 ### Running the Server
 
-To start the server, run:
+Ensure your `OPENAI_API_KEY` is correctly set in your `.env` file.
+
+You can run the server using:
 ```bash
-python mcp_server.py
+python mcp_calculator_server.py
 ```
-By default, the server listens on `http://0.0.0.0:5000/`.
-
-### API Endpoint
-
-- **Method:** `POST`
-- **URL:** `/calculate`
-
-### Request Format
-
-- **Content-Type:** `application/json`
-- **Body:** A JSON object with the following fields:
-    - `expression` (string, required): The mathematical expression to evaluate.
-    - `model` (string, optional): The OpenAI model to use (e.g., "gpt-3.5-turbo"). Defaults to the server's pre-configured default if not provided.
-    - `temperature` (float, optional): The temperature for the OpenAI API response generation. Defaults to the server's pre-configured default if not provided.
-
-### Example Request (using `curl`)
-
+Alternatively, you can use the MCP CLI for development:
 ```bash
-curl -X POST -H "Content-Type: application/json" -d '{"expression": "5 * (3+2)"}' http://localhost:5000/calculate
+mcp dev mcp_calculator_server.py
 ```
+The server will register with the name "OpenAICalculatorService".
 
-### Example Response
+### Exposed Tool
 
-A successful calculation will return a JSON response similar to this:
+The server exposes the following tool:
+
+-   **Name:** `evaluate_expression`
+-   **Description:** Evaluates a mathematical expression using OpenAI's function calling.
+-   **Parameters:**
+    -   `expression` (string, required): The mathematical expression string to evaluate.
+    -   `model` (string, optional, default: 'gpt-3.5-turbo'): The OpenAI model to use (e.g., 'gpt-3.5-turbo', 'gpt-4').
+    -   `temperature` (float, optional, default: 0.0): The sampling temperature for generation (0.0 to 2.0).
+-   **Returns:** A dictionary containing the evaluation result. This dictionary will include fields like `expression`, `result`, `operation_type`, and `status`. If an error occurs (either in input validation, during the OpenAI call, or if the OpenAI client is not initialized), the dictionary will contain an `error` field and the `status` will be "failed".
+
+### Interaction Example
+
+This server is designed to be used with MCP-compatible clients (e.g., an LLM that supports MCP for tool use). For development and inspection, you can explore using the `mcp` CLI. For instance, after starting the server, you might use commands like `mcp list` or `mcp call` (refer to MCP SDK documentation for precise usage).
+
+A typical interaction flow would be:
+1. An MCP client connects to the "OpenAICalculatorService".
+2. The client invokes the `evaluate_expression` tool with necessary parameters (e.g., `{"expression": "100 / (5 + 5)"}`).
+3. The server executes the tool using the `process_calculation` logic and returns the JSON result to the client.
+
+Example of a successful result structure:
 ```json
 {
-  "expression": "5 * (3+2)",
-  "result": 25,
+  "expression": "100 / (5 + 5)",
+  "result": 10,
   "operation_type": "mixed",
-  "status": "success" 
+  "status": "success"
 }
 ```
-Note: The `status` field indicates "success". Error responses will also be in JSON format and typically include an "error" field and "status": "failed", similar to the command-line tool.
+
+### Further Information on MCP
+
+For more details on the Model Context Protocol (MCP) and the design philosophy behind this server's implementation, please refer to `docs/llm.txt`.
 
 ## Error Handling
 
@@ -141,4 +154,5 @@ If an error occurs, the output will be in the following format:
   - openai>=1.0.0
   - python-dotenv>=0.19.0
   - argparse>=1.4.0
-  - Flask>=2.0.0
+  - mcp[cli]>=1.9.0
+  - pydantic>=2.0.0

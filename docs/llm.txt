@@ -1,0 +1,20 @@
+Information sources for Model Context Protocol (MCP) implementation:
+
+1. Official Python SDK Documentation:
+   https://github.com/modelcontextprotocol/python-sdk
+
+2. Article with Examples:
+   https://blog.openreplay.com/build-mcp-server-step-by-step-code-examples/
+
+Summary of MCP Understanding:
+
+The Model Context Protocol (MCP), specified by Anthropic, is designed to allow Large Language Models (LLMs) to interact with external systems, data, and tools in a standardized and secure way.
+It separates the concerns of providing context from the actual LLM interaction.
+
+Key components of an MCP server implementation (typically using the `FastMCP` class from the Python SDK) include:
+
+- Tools: These are callable functions that allow the LLM to perform actions or computations. They are similar to POST requests in a traditional API. Tools are defined with specific input parameters and return values.
+- Resources: These provide data that the LLM can read or query. They are similar to GET requests in a traditional API and are used to load information into the LLM's context.
+- Prompts: Reusable templates that guide the LLM's interaction with the server's tools and resources.
+
+The Python SDK (`mcp.server.fastmcp.FastMCP`) provides decorators and methods to define these tools and resources. Servers can be run using various transports, including Streamable HTTP, allowing them to be integrated into ASGI applications like FastAPI or Starlette. The MCP CLI can be used for development and server management (e.g., `mcp dev server.py`).
