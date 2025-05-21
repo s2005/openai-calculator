@@ -78,6 +78,50 @@ python calculator.py --model gpt-4 --temperature 0.2 "23 * 45"
 }
 ```
 
+## MCP Server Usage
+
+The Multi-Calculator Proxy (MCP) server provides an HTTP API for calculations.
+
+### Running the Server
+
+To start the server, run:
+```bash
+python mcp_server.py
+```
+By default, the server listens on `http://0.0.0.0:5000/`.
+
+### API Endpoint
+
+- **Method:** `POST`
+- **URL:** `/calculate`
+
+### Request Format
+
+- **Content-Type:** `application/json`
+- **Body:** A JSON object with the following fields:
+    - `expression` (string, required): The mathematical expression to evaluate.
+    - `model` (string, optional): The OpenAI model to use (e.g., "gpt-3.5-turbo"). Defaults to the server's pre-configured default if not provided.
+    - `temperature` (float, optional): The temperature for the OpenAI API response generation. Defaults to the server's pre-configured default if not provided.
+
+### Example Request (using `curl`)
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"expression": "5 * (3+2)"}' http://localhost:5000/calculate
+```
+
+### Example Response
+
+A successful calculation will return a JSON response similar to this:
+```json
+{
+  "expression": "5 * (3+2)",
+  "result": 25,
+  "operation_type": "mixed",
+  "status": "success" 
+}
+```
+Note: The `status` field indicates "success". Error responses will also be in JSON format and typically include an "error" field and "status": "failed", similar to the command-line tool.
+
 ## Error Handling
 
 If an error occurs, the output will be in the following format:
@@ -97,3 +141,4 @@ If an error occurs, the output will be in the following format:
   - openai>=1.0.0
   - python-dotenv>=0.19.0
   - argparse>=1.4.0
+  - Flask>=2.0.0
